@@ -49,8 +49,13 @@ void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
 	}
 }
 
+void LerAtributosDoArquivo (FILE * * arquivo, tabela * * tabelaCriada ) {
+	//Implementar aqui uma funcao que leia as linhas do arquivo
+	//com atributos, implemente o criarAtributos e inserirAtributosNaTabela...
+}
 
-void CriarTabela (bd * * bancoDeDados, char nomeTabela[50]) {
+
+void CriarTabela (bd * * bancoDeDados, char nomeTabela[50], FILE * * arquivo) {
 	tabela * novaTabela = (tabela*)malloc(sizeof(tabela));
 	strcpy((novaTabela -> nometabela), nomeTabela);
 	novaTabela -> listaAtributos = NULL;
@@ -67,12 +72,11 @@ void GetName (char * ponteiro, char &nome, char  comando [] ) {
 	strncpy(auxNome, ponteiro, tamanho_nome);
 	auxNome[tamanho_nome]='\0';
 	strcpy(*nome , auxNome );
-
 }
 
 void LeArquivo(bd * * b_dados){
 	FILE *ptr = fopen("ComandoSQL.txt", "r+");
-	char linha[1000], *ponteiroNomeDoBanco, *ponteiroNomeDaTabela;
+	char linha[100], *ponteiroNomeDoBanco, *ponteiroNomeDaTabela;
 	char auxNome[30];
 	int cont = 0;
 	while(!feof(ptr)){
