@@ -33,7 +33,7 @@ void CriarTabela (bd * * bancoDeDados, char nomeTabela[50], atributo * atributos
 
 int main()
 {
-	bd *banco_dados;
-	InicializaBanco(&banco_dados);
-	exibir(banco_dados);
+	bd *bancoDeDados;
+	InicializaBanco(&bancoDeDados);
+	exibir(bancoDeDados);
 }
