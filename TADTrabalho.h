@@ -12,9 +12,8 @@ struct Tabela{
 typedef struct Tabela tabela;
 
 struct Atributo{
-	struct Atributos *prox;
+	struct Atributo *prox, * FK;
 	char campo[50], tipo, PK;
-	atributo * FK;
 	struct ldados *listaDados; //No PDF do trabalho est� representado como um campo dentro de T1, T2 que aponta para uma lista de dados
 };
 typedef struct Atributo atributo;
@@ -79,8 +78,9 @@ typedef struct ListaDados ldados;
 
 void CriarBancoDeDados (bd * * bancoDeDados, char nome [50]) {
 	* bancoDeDados = (bd *)malloc(sizeof(bd));
-	strcpy((* bancoDeDados) ->  nome_banco), nome);
+	strcpy(((* bancoDeDados) ->  nome_banco), nome);
 	(* bancoDeDados) -> listaTabela = NULL;
+	printf("Banco de dados com o nome de %s criado com sucesso\n", (* bancoDeDados) -> nome_banco);
 }
 
 

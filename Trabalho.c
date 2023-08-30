@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "TADTrabalho.h"
 
-
 void InsereAtributoNaTabela (tabela * * tabela , atributo * * novoAtributo ) {
 	(* novoAtributo) -> prox = NULL;
 
@@ -33,20 +32,20 @@ void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo, char PK
 }
 
 
-void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * tabela ) {
-	(*tabela) -> ant = NULL;
-	(*tabela) -> prox = NULL;
+void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
+	(*novaTabela) -> ant = NULL;
+	(*novaTabela) -> prox = NULL;
 	if((* bancoDeDados) -> listaTabela  == NULL) {
-		(* bancoDeDados) -> listaTabela = tabela;
+		(* bancoDeDados) -> listaTabela = novaTabela;
 	}
 	else {
 		tabela * aux;
 		aux = (* bancoDeDados) -> listaTabela;
-		while( aux -> prox != NULL) {
+		while(aux -> prox != NULL) {
 			aux = aux -> prox;
 		}
-		aux -> prox = * tabela;
-		(* tabela) -> ant = aux;
+		aux -> prox = * novaTabela;
+		(* novaTabela) -> ant = aux;
 	}
 }
 
@@ -60,10 +59,42 @@ void CriarTabela (bd * * bancoDeDados, char nomeTabela[50]) {
 
 
 
+void LeArquivo(bd * * b_dados){
+	FILE *ptr = fopen("ComandoSQL.txt", "r+");
+	char linha[1000], *ponteiroNomeDoBanco, *ponteiroNomeDaTabela;
+	char auxNome[30];
+	int cont = 0;
+	while(!feof(ptr)){
+		if(fgets(linha, sizeof(linha), ptr) != NULL){
+			
+			ponteiroNomeDoBanco = strstr(linha, "CREATE DATABASE");
+			if(ponteiroNomeDoBanco != NULL){
+		
+				ponteiroNomeDoBanco += strlen("CREATE DATABASE");
+					
+ 				while(*ponteiroNomeDoBanco == ' ')
+ 					ponteiroNomeDoBanco++;
+				
+ 				int tamanho_nome = strcspn(ponteiroNomeDoBanco, " ;\n");
+ 				strncpy(auxNome, ponteiroNomeDoBanco, tamanho_nome);
+ 				auxNome[tamanho_nome] = '\0';
+				 
+				CriarBancoDeDados(b_dados, auxNome);		
+			}
+			
+			ponteiroNomeDaTabela = strstr(linha, "CREATE TABLE");
+			if(ponteiroNomeDaTabela != NULL){
+				tabela *novaTabela;
+				ponteiroNomeDaTabela += strlen()
+			}	
+		}
+	}
+}
+
 
 int main()
 {
 	bd *bancoDeDados;
-	InicializaBanco(&bancoDeDados);
+	LeArquivo(&bancoDeDados);
 	exibir(bancoDeDados);
 }
