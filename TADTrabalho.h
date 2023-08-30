@@ -14,6 +14,7 @@ typedef struct Tabela tabela;
 struct Atributo{
 	struct Atributos *prox;
 	char campo[50], tipo, PK;
+	atributo * FK;
 	struct ldados *listaDados; //No PDF do trabalho est� representado como um campo dentro de T1, T2 que aponta para uma lista de dados
 };
 typedef struct Atributo atributo;
