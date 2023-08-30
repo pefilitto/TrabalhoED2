@@ -84,7 +84,6 @@ void CriarBancoDeDados (bd * * bancoDeDados, char nome [50]) {
 }
 
 
-//Funcao teste para ver se realmente criou o banco
 void exibir(bd *b_dados){
 	if(b_dados != NULL)
 		printf("\n\nNome do banco: %s", b_dados->nome_banco);

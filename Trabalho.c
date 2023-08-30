@@ -34,8 +34,8 @@ void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo, char PK
 
 
 void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * tabela ) {
-	tabela -> ant = NULL;
-	tabela -> prox = NULL;
+	(*tabela) -> ant = NULL;
+	(*tabela) -> prox = NULL;
 	if((* bancoDeDados) -> listaTabela  == NULL) {
 		(* bancoDeDados) -> listaTabela = tabela;
 	}
