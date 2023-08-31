@@ -47,51 +47,61 @@ void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
 		aux -> prox = * novaTabela;
 		(* novaTabela) -> ant = aux;
 	}
+	
+	printf("Tabela de nome %s foi criada dentro do banco %s\n", (*novaTabela) -> nometabela, (*bancoDeDados) -> nome_banco);
+}
+
+void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
+	
 }
 
 
-void CriarTabela (bd * * bancoDeDados, char nomeTabela[50]) {
+void CriarTabela (bd * * bancoDeDados, char nomeTabela[50], FILE * * arquivo) {
 	tabela * novaTabela = (tabela*)malloc(sizeof(tabela));
 	strcpy((novaTabela -> nometabela), nomeTabela);
 	novaTabela -> listaAtributos = NULL;
 	InsereTabelaNoBancoDeDados(bancoDeDados, &novaTabela);
+	LerAtributosDoArquivo(&arquivo, &novaTabela);
 }
 
-void GetName (char * ponteiro, char &nome, char  comando [] ) {
-	char auxNome[30];
-	ponteiro += strlen(comando);
-	while(*ponteiro == ' '){
-		ponteiro++;
-	}
-	int tamanho_nome = strcspn(ponteiro, " ;\n");
-	strncpy(auxNome, ponteiro, tamanho_nome);
-	auxNome[tamanho_nome]='\0';
-	strcpy(*nome , auxNome );
+void GetName(char *ponteiro, char *nome, char comando[]) {
+    char auxNome[30];
+    ponteiro += strlen(comando);
 
+    while (*ponteiro == ' ') {
+        ponteiro++;
+    }
+
+    int tamanho_nome = strcspn(ponteiro, " ;\n");
+    
+    strncpy(auxNome, ponteiro, tamanho_nome);
+    auxNome[tamanho_nome] = '\0';
+    
+    strcpy(nome, auxNome);
 }
 
-void LeArquivo(bd * * b_dados){
-	FILE *ptr = fopen("ComandoSQL.txt", "r+");
-	char linha[1000], *ponteiroNomeDoBanco, *ponteiroNomeDaTabela;
-	char auxNome[30];
-	int cont = 0;
-	while(!feof(ptr)){
-		if(fgets(linha, sizeof(linha), ptr) != NULL){
-			
-			ponteiroNomeDoBanco = strstr(linha, "CREATE DATABASE");
-			if(ponteiroNomeDoBanco != NULL){
-				GetName(ponteiroNomeDoBanco,auxNome,"CREATE DATABASE")
-				CriarBancoDeDados(b_dados, auxNome);		
-			}
-			
-			ponteiroNomeDaTabela = strstr(linha, "CREATE TABLE");
-			if(ponteiroNomeDaTabela != NULL){
-				GetName(ponteiroNomeDaTabela,auxNome,"CREATE TABLE");
-				CriarTabela(b_dados,auxNome);
-			}	
-		}
-	}
+void LeArquivo(bd **b_dados) {
+    FILE *ptr = fopen("ComandoSQL.txt", "r+");
+    char linha[1000], auxNome[50];
+    int cont = 0;
+
+    while (fgets(linha, sizeof(linha), ptr) != NULL) {
+        char *ponteiroNomeDoBanco = strstr(linha, "CREATE DATABASE");
+        if (ponteiroNomeDoBanco != NULL) {
+            GetName(ponteiroNomeDoBanco, auxNome, "CREATE DATABASE");
+            CriarBancoDeDados(b_dados, auxNome);        
+        }
+
+        char *ponteiroNomeDaTabela = strstr(linha, "CREATE TABLE");
+        if (ponteiroNomeDaTabela != NULL) {
+            GetName(ponteiroNomeDaTabela, auxNome, "CREATE TABLE");
+            CriarTabela(b_dados, auxNome, ptr);
+        }
+    }
+
+    fclose(ptr);
 }
+
 
 
 int main()

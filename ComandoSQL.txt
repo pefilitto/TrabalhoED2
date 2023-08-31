@@ -1,6 +1,6 @@
 CREATE DATABASE db_locadora;
 
-CREATE TABLE cliente (
+CREATE TABLE cliente(
 id_cliente INTEGER NOT NULL,
 nome CHARACTER(20) ,
 cpf CHARACTER(20) ,
