@@ -17,9 +17,10 @@ void InsereAtributoNaTabela (tabela * * tabela , atributo * * novoAtributo ) {
 		}
 		aux -> prox = novoAtributo;
 	}
+	printf("Atributo %s inserido na tabela %s", (*novoAtributo) -> campo, (*tabela) -> nometabela);
 }
 
-void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo, char PK) {
+void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo) {
 	atributo * novoAtributo;
 	novoAtributo = (atributo *)malloc(sizeof(atributo));
 	strcpy((novoAtributo->campo), nomeAtributo);
@@ -27,8 +28,8 @@ void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo, char PK
 	novoAtributo -> FK = NULL;
 	novoAtributo -> listaDados = NULL;
 	novoAtributo -> prox = NULL; 
-	novoAtributo -> PK = PK;
-	InsereAtributoNaTabela (tabela, &novoAtributo);
+	novoAtributo -> PK = NULL;
+	InsereAtributoNaTabela (&(*tabela), &novoAtributo);
 }
 
 
@@ -52,7 +53,11 @@ void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
 }
 
 void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
-	
+	char nome[50], tipo[20];
+	while(fscanf(*arquivo, "%s %s", &nome, &tipo)==2)
+	{
+		CriarAtributo(&(*tabelaCriada), nome, tipo[0]);
+	}	
 }
 
 
@@ -95,7 +100,7 @@ void LeArquivo(bd **b_dados) {
         char *ponteiroNomeDaTabela = strstr(linha, "CREATE TABLE");
         if (ponteiroNomeDaTabela != NULL) {
             GetName(ponteiroNomeDaTabela, auxNome, "CREATE TABLE");
-            CriarTabela(b_dados, auxNome, ptr);
+            CriarTabela(b_dados, auxNome, &ptr);
         }
     }
 
