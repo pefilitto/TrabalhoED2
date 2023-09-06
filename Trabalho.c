@@ -17,7 +17,7 @@ void InsereAtributoNaTabela (tabela * * tabela , atributo * * novoAtributo ) {
 		}
 		aux -> prox = novoAtributo;
 	}
-	printf("Atributo %s inserido na tabela %s", (*novoAtributo) -> campo, (*tabela) -> nometabela);
+	printf("Atributo %s inserido na tabela %s\n", (*novoAtributo) -> campo, (*tabela) -> nometabela);
 }
 
 void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo) {
@@ -29,6 +29,7 @@ void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo) {
 	novoAtributo -> listaDados = NULL;
 	novoAtributo -> prox = NULL; 
 	novoAtributo -> PK = NULL;
+	//printf("Atributo %s %s criado\n", novoAtributo->campo, novoAtributo->tipo);
 	InsereAtributoNaTabela (&(*tabela), &novoAtributo);
 }
 
@@ -54,10 +55,14 @@ void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
 
 void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
 	char nome[50], tipo[20];
-	while(fscanf(*arquivo, "%s %s", &nome, &tipo)==2)
-	{
-		CriarAtributo(&(*tabelaCriada), nome, tipo[0]);
-	}	
+	if(*arquivo == NULL)
+		printf("Ponteiro invalido na funcao leratributos\n");
+	else{
+		while (fscanf(*arquivo, "%s %s", &nome, &tipo) == 2)
+		{
+			CriarAtributo(&(*tabelaCriada), nome, tipo[0]);
+		}		
+	}
 }
 
 
@@ -66,7 +71,7 @@ void CriarTabela (bd * * bancoDeDados, char nomeTabela[50], FILE * * arquivo) {
 	strcpy((novaTabela -> nometabela), nomeTabela);
 	novaTabela -> listaAtributos = NULL;
 	InsereTabelaNoBancoDeDados(bancoDeDados, &novaTabela);
-	LerAtributosDoArquivo(&arquivo, &novaTabela);
+	LerAtributosDoArquivo(&(*arquivo), &novaTabela);
 }
 
 void GetName(char *ponteiro, char *nome, char comando[]) {
@@ -103,7 +108,6 @@ void LeArquivo(bd **b_dados) {
             CriarTabela(b_dados, auxNome, &ptr);
         }
     }
-
     fclose(ptr);
 }
 
