@@ -54,13 +54,34 @@ void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
 }
 
 void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
-	char nome[50], tipo[20];
+	char nome[50], tipo[20], linha[1000];
+	int flag=0, i;
 	if(*arquivo == NULL)
 		printf("Ponteiro invalido na funcao leratributos\n");
 	else{
-		while (fscanf(*arquivo, "%s %s", &nome, &tipo) == 2)
+		while (flag == 0)
 		{
-			CriarAtributo(&(*tabelaCriada), nome, tipo[0]);
+			fscanf(*arquivo, "%[^\n]", &linha);
+			fgetc(*arquivo);
+			if(strstr(linha, "CONSTRAINT") != NULL){
+				//Colocar aqui a funcao para manipular o constraint
+			}
+			else{
+				if(strstr(linha, ");") != NULL){
+					printf("Achou o );\n");
+					
+					//Colocando os dois fgetc abaixo para ignorar o ); e a linha vazia do arquivo
+					fgetc(*arquivo);
+					fgetc(*arquivo);
+				}
+				else{
+					for(i=0; i<strlen(linha) && linha[i] != ' '; i++)
+						nome[i] = linha[i];
+					nome[i] = '\0';
+					tipo[0] = linha[i+1];
+					CriarAtributo(&(*tabelaCriada), nome, tipo[0]);	
+				}	
+			} 
 		}		
 	}
 }
@@ -92,7 +113,7 @@ void GetName(char *ponteiro, char *nome, char comando[]) {
 
 void LeArquivo(bd **b_dados) {
     FILE *ptr = fopen("ComandoSQL.txt", "r+");
-    char linha[1000], auxNome[50];
+    char linha[1000], auxNome[45];
     int cont = 0;
 
     while (fgets(linha, sizeof(linha), ptr) != NULL) {
@@ -107,6 +128,16 @@ void LeArquivo(bd **b_dados) {
             GetName(ponteiroNomeDaTabela, auxNome, "CREATE TABLE");
             CriarTabela(b_dados, auxNome, &ptr);
         }
+        
+        //*ponteiroNomeDaTabela = strstr(linha, "ALTER TABLE");
+        //if(ponteiroNomeDaTabela != NULL){
+        //	printf("Achou o alter table\n");
+        //}
+        
+        //*ponteiroNomeDaTabela = strstr(linha, "FOREIGN KEY");
+        //if(ponteiroNomeDaTabela != NULL){
+        //	printf("Achou o foreign key\n");
+        //}
     }
     fclose(ptr);
 }
