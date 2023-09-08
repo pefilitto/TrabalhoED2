@@ -29,7 +29,6 @@ void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo) {
 	novoAtributo -> listaDados = NULL;
 	novoAtributo -> prox = NULL; 
 	novoAtributo -> PK = NULL;
-	//printf("Atributo %s %s criado\n", novoAtributo->campo, novoAtributo->tipo);
 	InsereAtributoNaTabela (&(*tabela), &novoAtributo);
 }
 
@@ -37,10 +36,11 @@ void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo) {
 void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
 	(*novaTabela) -> ant = NULL;
 	(*novaTabela) -> prox = NULL;
-	if((* bancoDeDados) -> listaTabela  == NULL) {
+	if((* bancoDeDados) -> listaTabela == NULL) {
 		(* bancoDeDados) -> listaTabela = novaTabela;
 	}
 	else {
+		//Está dando erro de acesso a memoria aqui nessa função
 		tabela * aux;
 		aux = (* bancoDeDados) -> listaTabela;
 		while(aux -> prox != NULL) {
@@ -69,10 +69,8 @@ void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
 			else{
 				if(strstr(linha, ");") != NULL){
 					printf("Achou o );\n");
-					
-					//Colocando os dois fgetc abaixo para ignorar o ); e a linha vazia do arquivo
-					fgetc(*arquivo);
-					fgetc(*arquivo);
+					fgets(linha, sizeof(linha), (*arquivo));
+					flag=1;
 				}
 				else{
 					for(i=0; i<strlen(linha) && linha[i] != ' '; i++)
@@ -122,22 +120,22 @@ void LeArquivo(bd **b_dados) {
             GetName(ponteiroNomeDoBanco, auxNome, "CREATE DATABASE");
             CriarBancoDeDados(b_dados, auxNome);        
         }
-
+        
         char *ponteiroNomeDaTabela = strstr(linha, "CREATE TABLE");
         if (ponteiroNomeDaTabela != NULL) {
             GetName(ponteiroNomeDaTabela, auxNome, "CREATE TABLE");
             CriarTabela(b_dados, auxNome, &ptr);
         }
         
-        //*ponteiroNomeDaTabela = strstr(linha, "ALTER TABLE");
-        //if(ponteiroNomeDaTabela != NULL){
-        //	printf("Achou o alter table\n");
-        //}
+        /*char *ponteiroAlterTable = strstr(linha, "ALTER TABLE");
+        if(ponteiroNomeDaTabela == NULL){
+        	printf("Achou o alter table\n");
+        }
         
-        //*ponteiroNomeDaTabela = strstr(linha, "FOREIGN KEY");
-        //if(ponteiroNomeDaTabela != NULL){
-        //	printf("Achou o foreign key\n");
-        //}
+        char *ponteiroForeignKey = strstr(linha, "FOREIGN KEY");
+        if(ponteiroNomeDaTabela == NULL){
+        	printf("Achou o foreign key\n");
+        }*/
     }
     fclose(ptr);
 }
