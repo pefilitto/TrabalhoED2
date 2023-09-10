@@ -33,25 +33,25 @@ void CriarAtributo (tabela * * tabela, char nomeAtributo[50], char tipo) {
 }
 
 
-void InsereTabelaNoBancoDeDados (bd * * bancoDeDados, tabela * * novaTabela ) {
-	(*novaTabela) -> ant = NULL;
-	(*novaTabela) -> prox = NULL;
-	if((* bancoDeDados) -> listaTabela == NULL) {
-		(* bancoDeDados) -> listaTabela = novaTabela;
-	}
+void InsereTabelaNoBancoDeDados(bd **bancoDeDados, tabela **novaTabela) {
+    (*novaTabela)->ant = NULL;
+    (*novaTabela)->prox = NULL;
+    
+    if ((*bancoDeDados)->listaTabela == NULL) {
+        (*bancoDeDados)->listaTabela = *novaTabela;
+    } 
 	else {
-		//Está dando erro de acesso a memoria aqui nessa função
-		tabela * aux;
-		aux = (* bancoDeDados) -> listaTabela;
-		while(aux -> prox != NULL) {
-			aux = aux -> prox;
-		}
-		aux -> prox = * novaTabela;
-		(* novaTabela) -> ant = aux;
-	}
-	
-	printf("Tabela de nome %s foi criada dentro do banco %s\n", (*novaTabela) -> nometabela, (*bancoDeDados) -> nome_banco);
+        tabela *aux = (*bancoDeDados)->listaTabela;
+        while (aux->prox != NULL) {
+            aux = aux->prox;
+        }
+        aux->prox = *novaTabela;
+        (*novaTabela)->ant = aux;
+    }
+    
+    printf("\nTabela %s foi criada dentro do banco %s\n", (*novaTabela)->nometabela, (*bancoDeDados)->nome_banco);
 }
+
 
 void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
 	char nome[50], tipo[20], linha[1000];
@@ -68,7 +68,7 @@ void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
 			}
 			else{
 				if(strstr(linha, ");") != NULL){
-					printf("Achou o );\n");
+					//Quando achar o );
 					fgets(linha, sizeof(linha), (*arquivo));
 					flag=1;
 				}
@@ -93,21 +93,26 @@ void CriarTabela (bd * * bancoDeDados, char nomeTabela[50], FILE * * arquivo) {
 	LerAtributosDoArquivo(&(*arquivo), &novaTabela);
 }
 
-void GetName(char *ponteiro, char *nome, char comando[]) {
+void GetName(char *ponteiro, char *nome, const char *comando) {
     char auxNome[30];
     ponteiro += strlen(comando);
 
-    while (*ponteiro == ' ') {
+    while (*ponteiro == ' ' || *ponteiro == '(') {
         ponteiro++;
     }
 
     int tamanho_nome = strcspn(ponteiro, " ;\n");
-    
+
+    if (ponteiro[tamanho_nome - 1] == '(') {
+        tamanho_nome--; 
+    }
+
     strncpy(auxNome, ponteiro, tamanho_nome);
     auxNome[tamanho_nome] = '\0';
-    
+
     strcpy(nome, auxNome);
 }
+
 
 void LeArquivo(bd **b_dados) {
     FILE *ptr = fopen("ComandoSQL.txt", "r+");
@@ -120,22 +125,21 @@ void LeArquivo(bd **b_dados) {
             GetName(ponteiroNomeDoBanco, auxNome, "CREATE DATABASE");
             CriarBancoDeDados(b_dados, auxNome);        
         }
-        
         char *ponteiroNomeDaTabela = strstr(linha, "CREATE TABLE");
         if (ponteiroNomeDaTabela != NULL) {
             GetName(ponteiroNomeDaTabela, auxNome, "CREATE TABLE");
             CriarTabela(b_dados, auxNome, &ptr);
         }
         
-        /*char *ponteiroAlterTable = strstr(linha, "ALTER TABLE");
-        if(ponteiroNomeDaTabela == NULL){
-        	printf("Achou o alter table\n");
+        char *ponteiroAlterTable = strstr(linha, "ALTER TABLE");
+        if(ponteiroAlterTable != NULL){
+        	printf("\nAchou o alter table\n");
         }
         
         char *ponteiroForeignKey = strstr(linha, "FOREIGN KEY");
-        if(ponteiroNomeDaTabela == NULL){
+        if(ponteiroForeignKey != NULL){
         	printf("Achou o foreign key\n");
-        }*/
+        }
     }
     fclose(ptr);
 }
