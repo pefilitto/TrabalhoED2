@@ -52,10 +52,21 @@ void InsereTabelaNoBancoDeDados(bd **bancoDeDados, tabela **novaTabela) {
     printf("\nTabela %s foi criada dentro do banco %s\n", (*novaTabela)->nometabela, (*bancoDeDados)->nome_banco);
 }
 
+void AtribuiPKaoAtributo(tabela * * t, char nome[]){
+	atributo *aux = (*t) -> listaAtributos;
+	while(aux -> prox != NULL & strcmp(nome, aux -> campo) != 0)
+		aux = aux -> prox;
+	
+	if(aux != NULL){
+		aux -> PK = 'S';
+		printf("Atributo %s recebeu PK\n", aux -> campo);
+	}
+		
+}
 
 void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
-	char nome[50], tipo[20], linha[1000];
-	int flag=0, i;
+	char nome[50], tipo[20], linha[1000], linha2[1000];
+	int flag=0, i, j, z=0;
 	if(*arquivo == NULL)
 		printf("Ponteiro invalido na funcao leratributos\n");
 	else{
@@ -64,7 +75,20 @@ void LerAtributosDoArquivo(FILE * * arquivo, tabela * * tabelaCriada){
 			fscanf(*arquivo, "%[^\n]", &linha);
 			fgetc(*arquivo);
 			if(strstr(linha, "CONSTRAINT") != NULL){
-				//Colocar aqui a funcao para manipular o constraint
+				if(strstr(linha, "PRIMARY KEY") != NULL){
+					printf("Achou o primary key\n");
+					for(i=0; i<strlen(linha); i++){
+						if(linha[i] == '('){
+							for(j=i+1; j<strlen(linha) && linha[j] != ')'; j++){
+								nome[z] = linha[j];
+								z++;	
+							}
+							
+							nome[j-1] = '\0';
+							AtribuiPKaoAtributo(&(*tabelaCriada), nome);
+						}
+					}
+				}
 			}
 			else{
 				if(strstr(linha, ");") != NULL){
@@ -114,7 +138,7 @@ void GetName(char *ponteiro, char *nome, const char *comando) {
 }
 
 
-void LeArquivo(bd **b_dados) {
+void LeArquivo(bd * * b_dados) {
     FILE *ptr = fopen("ComandoSQL.txt", "r+");
     char linha[1000], auxNome[45];
     int cont = 0;
@@ -134,11 +158,10 @@ void LeArquivo(bd **b_dados) {
         char *ponteiroAlterTable = strstr(linha, "ALTER TABLE");
         if(ponteiroAlterTable != NULL){
         	printf("\nAchou o alter table\n");
-        }
-        
-        char *ponteiroForeignKey = strstr(linha, "FOREIGN KEY");
-        if(ponteiroForeignKey != NULL){
-        	printf("Achou o foreign key\n");
+        	GetName(ponteiroAlterTable, auxNome, "ALTER TABLE");
+        	if(buscarTabela(b_dados, auxNome)){
+        		//Colocar aqui a funcao para manipular o ALTER TABLE
+        	}
         }
     }
     fclose(ptr);

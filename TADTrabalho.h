@@ -43,6 +43,16 @@ void CriarBancoDeDados (bd * * bancoDeDados, char nome [50]) {
 	printf("Banco de dados com o nome de %s criado com sucesso\n", (* bancoDeDados) -> nome_banco);
 }
 
+char buscarTabela(bd * * bancoDeDados, char nomeTabela[]){
+	tabela *aux = (*bancoDeDados) -> listaTabela;
+	while(aux -> prox != NULL && strcmp(nomeTabela, aux -> nometabela) != 0)
+		aux = aux -> prox;
+	
+	if(aux == NULL)
+		return 0;
+	return 1;
+}
+
 
 void exibir(bd *b_dados){
 	if(b_dados != NULL)
