@@ -3,6 +3,28 @@
 #include <stdlib.h>
 #include "TADTrabalho.h"
 
+char buscarTabela(bd * * bancoDeDados, char nomeTabela[]){
+	tabela *aux = (*bancoDeDados) -> listaTabela;
+	while(aux -> prox != NULL && strcmp(nomeTabela, aux -> nometabela) != 0)
+		aux = aux -> prox;
+	
+	if(aux == NULL)
+		return 0;
+	return 1;
+}
+
+tabela *buscaValoresAtributos(bd * bancoDeDados, char nomeTabela[50]){
+	tabela *aux = bancoDeDados -> listaTabela;
+	while(aux -> prox != NULL && strcmp(nomeTabela, aux -> nometabela) != 0)
+		aux = aux -> prox;
+	
+	if(aux != NULL)
+		return aux -> listaAtributos;
+}
+
+
+//Iniciando a criacao das estruturas
+
 void InsereAtributoNaTabela (tabela * * tabela , atributo * * novoAtributo ) {
 	(* novoAtributo) -> prox = NULL;
 
@@ -160,18 +182,74 @@ void LeArquivo(bd * * b_dados) {
         	printf("\nAchou o alter table\n");
         	GetName(ponteiroAlterTable, auxNome, "ALTER TABLE");
         	if(buscarTabela(b_dados, auxNome)){
-        		//Colocar aqui a funcao para manipular o ALTER TABLE
+        		//Colocar aqui a funcao para manipular o ALTER TABLE	
         	}
         }
     }
     fclose(ptr);
 }
 
+//Finalizando a criação das estruturas
 
+
+//Iniciando os comandos INSERT, DELETE, SELECT e UPDATE
+
+void InsereValorNoAtributo(tabela *ponteiroTabela){
+	//Colocar aqui a logica de inserir os valores do atributo
+}
+
+void Inserir(bd * * bancoDeDados, char comando[]){
+	char nomeTabela[50];
+	int i, a;
+	for(i=strlen("INSERT INTO "), a=0; i<strlen(comando) && comando[i] != ' '; i++, a++){
+		nomeTabela[a] = comando[i];
+	}
+	nomeTabela[a] = '\0';
+	
+	tabela *ptrApontaValoresAtributos = buscaValoresAtributos(*bancoDeDados, nomeTabela);
+	
+	//Passar como segundo parametro na funcao abaixo a string contendo o restante do comando INSERT
+	InsereValorNoAtributo(ptrApontaValoresAtributos);
+}
+
+char LeComando(bd * * bancoDeDados, char comando[]){
+	if(!strcmp(comando,"sair")){
+		printf("saiu\n");
+		return '0';
+	}
+	else{
+		char * ponteiroInsert = strstr(comando,"INSERT INTO");
+		if(ponteiroInsert!=NULL){
+			printf("\nEntrou no if do insert\n");
+			Inserir(&(*bancoDeDados), comando);
+		}
+		char * ponteiroUpdate = strstr(comando,"UPDATE");
+		if(ponteiroUpdate!=NULL){
+			//Atualizar(comando);
+		}
+		char * ponteiroSelect = strstr(comando,"SELECT");
+		if(ponteiroSelect!=NULL){
+			//Selecionar(comando);
+		}
+		char * ponteiroDelete = strstr(comando,"DELETE");
+		if(ponteiroDelete!=NULL){
+			//Deletar(comando);
+		}
+		return '1';
+	}
+	
+}
 
 int main()
 {
+	char comando[2000];
 	bd *bancoDeDados;
 	LeArquivo(&bancoDeDados);
+	printf("Digite o comando: ");
+	fflush(stdin);
+	while(LeComando(&bancoDeDados, gets(comando)) != '0'){
+		printf("Digite o comando: ");
+		fflush(stdin);	
+	}
 	exibir(bancoDeDados);
 }

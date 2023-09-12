@@ -31,4 +31,4 @@ ALTER TABLE aluguel ADD CONSTRAINT cliente_aluguel
 FOREIGN KEY (id_cliente) REFERENCES cliente (id_cliente);
 
 ALTER TABLE aluguel ADD CONSTRAINT veiculo_aluguel
-FOREIGN KEY (id_veiculo) REFERENCES veiculo (id_veiculo)
+FOREIGN KEY (id_veiculo) REFERENCES veiculo (id_veiculo);

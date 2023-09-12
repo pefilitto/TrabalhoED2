@@ -12,7 +12,7 @@ struct Tabela{
 typedef struct Tabela tabela;
 
 struct Atributo{
-	struct Atributo *prox, * FK;
+	struct Atributo *prox, *FK;
 	char campo[50], tipo, PK;
 	struct ldados *listaDados; //No PDF do trabalho est� representado como um campo dentro de T1, T2 que aponta para uma lista de dados
 };
@@ -43,20 +43,9 @@ void CriarBancoDeDados (bd * * bancoDeDados, char nome [50]) {
 	printf("Banco de dados com o nome de %s criado com sucesso\n", (* bancoDeDados) -> nome_banco);
 }
 
-char buscarTabela(bd * * bancoDeDados, char nomeTabela[]){
-	tabela *aux = (*bancoDeDados) -> listaTabela;
-	while(aux -> prox != NULL && strcmp(nomeTabela, aux -> nometabela) != 0)
-		aux = aux -> prox;
-	
-	if(aux == NULL)
-		return 0;
-	return 1;
-}
-
-
 void exibir(bd *b_dados){
 	if(b_dados != NULL)
-		printf("\n\nNome do banco: %s", b_dados->nome_banco);
+		printf("Banco %s", b_dados -> nome_banco);
 }
 
 
