@@ -1,0 +1,1 @@
+INSERT INTO ALUGUEL (id_aluguel, id_cliente, id_veiculo, dt_saida, dt_retorno, valor_pago) VALUES (1,2,3,4,5,6)
