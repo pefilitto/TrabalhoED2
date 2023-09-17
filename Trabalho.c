@@ -184,13 +184,47 @@ void LeArquivo(bd * * b_dados) {
     fclose(ptr);
 }
 
-//Finalizando a criação das estruturas
+//Finalizando a criaï¿½ï¿½o das estruturas
 
 
 //Iniciando os comandos INSERT, DELETE, SELECT e UPDATE
 
 #include <stdio.h>
 #include <string.h>
+
+void Insert(bd ** bancoDeDados, char nomeTabela[], char campos[][], char valores[][], int TL){
+	tabela * aux;
+	int x=0, y=0;
+	aux = (*bancoDeDados)->listaTabela;
+	while(aux ->nometabela != NULL && strcmp(aux->nometabela, nomeTabela) != 0){
+		aux = aux->prox;
+	}
+	while(y<TL) {
+		atributo * auxAtr = aux -> listaAtributos;
+		while(auxAtr != NULL && strcmp(auxAtr ->campo, campos[y]) != 0)
+			auxAtr = auxAtr->prox;
+		}
+		ldados * auxDados = auxAtr;
+		if(auxDados == NULL) {
+			auxDados = (ldados *)malloc(sizeof(ldados));
+			auxDados -> prox = NULL;
+			auxDados -> terminal = 1;
+			strcpy(auxDados->d,valores[y])
+		}
+		else {
+			while(auxDados->prox != NULL){
+				auxDados = auxDados->prox;
+			}
+			auxDados -> prox = (ldados *)malloc(sizeof(ldados));
+			auxDados = auxDados ->prox;
+			auxDados -> prox = NULL;
+			auxDados -> terminal = 1;
+			strcpy(auxDados->d,valores[y])
+		}
+		y++;
+	}
+
+}
 
 void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], char valores[]) {
     int i, j, k, flagParenteses = 0;
@@ -206,8 +240,8 @@ void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], cha
         matrizCampos[i][k] = '\0';
 
         if (campos[j] == ',' || campos[j] == ')') {
-            j++; // Avança para o próximo caractere após a vírgula ou parêntese
-            k = 0; // Reinicia o índice da matriz
+            j++; // Avanï¿½a para o prï¿½ximo caractere apï¿½s a vï¿½rgula ou parï¿½ntese
+            k = 0; // Reinicia o ï¿½ndice da matriz
         }
     }
 
@@ -218,13 +252,13 @@ void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], cha
         while (valores[j] != ',' && valores[j] != ')' && !flagParenteses) {
             matrizValores[i][k++] = valores[j++];
             if (valores[j] == ')')
-                flagParenteses = 1;
+                flagParenteses = i;
         }
         matrizValores[i][k] = '\0';
 
         if (valores[j] == ',' || valores[j] == ')') {
-            j++; // Avança para o próximo caractere após a vírgula ou parêntese
-            k = 0; // Reinicia o índice da matriz
+            j++; // Avanï¿½a para o prï¿½ximo caractere apï¿½s a vï¿½rgula ou parï¿½ntese
+            k = 0; // Reinicia o ï¿½ndice da matriz
         }
     }
 
@@ -240,7 +274,7 @@ void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], cha
     }
 }
 
-void CortarSQL(bd **bancoDeDados, char comando[]) {
+void CortarSQLInsert(bd **bancoDeDados, char comando[]) {
     char nomeTabela[50];
     int i, a;
     for (i = strlen("INSERT INTO "), a = 0; i < strlen(comando) && comando[i] != ' '; i++, a++) {
@@ -249,7 +283,7 @@ void CortarSQL(bd **bancoDeDados, char comando[]) {
     nomeTabela[a] = '\0';
 
     char *inicio_campos = strchr(comando, '(');
-    inicio_campos++; // Avançar para o primeiro caractere após o parêntese
+    inicio_campos++; // Avanï¿½ar para o primeiro caractere apï¿½s o parï¿½ntese
 
     char *fim_campos = strchr(inicio_campos, ')');
 
@@ -260,9 +294,9 @@ void CortarSQL(bd **bancoDeDados, char comando[]) {
 
     char *inicio_valores = strstr(comando, "VALUES");
     inicio_valores = strchr(inicio_valores, '(');
-    inicio_valores++; // Avançar para o primeiro caractere após o parêntese
+    inicio_valores++; // Avanï¿½ar para o primeiro caractere apï¿½s o parï¿½ntese
 
-    char *fim_valores = strrchr(comando, ')'); // Usar strrchr para encontrar o último ')'
+    char *fim_valores = strrchr(comando, ')'); // Usar strrchr para encontrar o ï¿½ltimo ')'
 
     char valores[100];
     int tamanho_valores = fim_valores - inicio_valores;
@@ -275,7 +309,7 @@ void CortarSQL(bd **bancoDeDados, char comando[]) {
 
 
 
-char LeComando(bd * * bancoDeDados, char comando[]){
+char  LeComando(bd * * bancoDeDados, char comando[]){
 	if(!strcmp(comando,"sair")){
 		printf("saiu\n");
 		return '0';
@@ -284,7 +318,7 @@ char LeComando(bd * * bancoDeDados, char comando[]){
 		char * ponteiroInsert = strstr(comando,"INSERT INTO");
 		if(ponteiroInsert!=NULL){
 			printf("\nEntrou no if do insert\n");
-			CortarSQL(&(*bancoDeDados), comando);
+			CortarSQLInsert(&(*bancoDeDados), comando);
 		}
 		char * ponteiroUpdate = strstr(comando,"UPDATE");
 		if(ponteiroUpdate!=NULL){

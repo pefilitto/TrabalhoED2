@@ -7,7 +7,7 @@ typedef struct BancoDeDados bd;
 struct Tabela{
 	struct Tabela *ant, *prox;
 	char nometabela[50];
-	struct atributo *listaAtributos;
+	struct Atributo *listaAtributos;
 };
 typedef struct Tabela tabela;
 
@@ -29,6 +29,7 @@ union Dados{
 struct ListaDados{
 	union Dados d;
 	char terminal; 
+	struct ListaDados * prox;
 };
 typedef struct ListaDados ldados;
 
