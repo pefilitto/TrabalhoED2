@@ -215,33 +215,32 @@ void LeArquivo(bd **b_dados)
 
 // Iniciando os comandos INSERT, DELETE, SELECT e UPDATE
 
-#include <stdio.h>
-#include <string.h>
-
 void Insert(bd **bancoDeDados, char nomeTabela[], char campo[], char valor[])
 {
 	tabela *aux;
 	int x = 0, y = 0;
 	aux = (*bancoDeDados)->listaTabela;
-	while (aux->nometabela != NULL && strcmp(aux->nometabela, nomeTabela) != 0)
+	while (aux->nometabela != NULL && stricmp(aux->nometabela, nomeTabela) != 0)
 	{
 		aux = aux->prox;
 	}
-	atributo *auxAtr = aux->listaAtributos;
-	while (auxAtr != NULL && strcmp(auxAtr->campo, campo) != 0)
+	atributo *auxAtr;
+	auxAtr = aux->listaAtributos;
+	while (auxAtr != NULL && stricmp(auxAtr->campo, campo) != 0)
 		auxAtr = auxAtr->prox;
 		
-	ldados *auxDados = auxAtr;
+	ldados *auxDados;
+	auxDados = auxAtr->listaDados;
 	if (auxDados == NULL)
 	{
 		auxDados = (ldados *)malloc(sizeof(ldados));
 		auxDados->prox = NULL;
 		auxDados->terminal = 1;
-		strcpy(auxDados->d, valor)
+		strcpy(auxDados->d.valorT, valor);
 	}
 	else
 	{
-		while (auxDados->prox != NULL)
+		while (auxDados -> prox != NULL)
 		{
 			auxDados = auxDados->prox;
 		}
@@ -249,34 +248,37 @@ void Insert(bd **bancoDeDados, char nomeTabela[], char campo[], char valor[])
 		auxDados = auxDados->prox;
 		auxDados->prox = NULL;
 		auxDados->terminal = 1;
-		strcpy(auxDados->d, valor)
+		strcpy(auxDados->d.valorT, valor);
 	}
 	y++;
+	printf("\nInseriu\n");
 }
 
 void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], char valores[])
 {
-	int i, c = 0, v = 0, k, flagParenteses = 0;
+	int i, c = 0, v = 0, k, flagParenteses = 0, l;
 	char campo[15], valor[15];
 
 	while (!flagParenteses)
 	{
 
-		for (i = 0; campos[c] != ',' && campos[c] != ')' && j < strlen(campos); i++, c++)
+		for (i = 0; campos[c] != ',' && campos[c] != ')' && c < strlen(campos); i++, c++)
 		{
 			campo[i] = campos[c];
 		}
 		c++;
-
-		for (int l = 0; valores[v] != ',' && valores[v] != ')' && v < strlen(valores); v++, l++)
+		campo[i] = '\0';
+		
+		for (l = 0; valores[v] != ',' && valores[v] != ')' && v < strlen(valores); v++, l++)
 		{
 			valor[l] = valores[v];
 		}
+		valor[l] = '\0';
 		v++;
-
+		printf("Inserindo campo %s, valor %s\n", campo, valor);
 		Insert(&(*bancoDeDados), nomeTabela, campo, valor);
 
-		if (c >= strlen(campos || v >= strlen(valores)))
+		if (c >= strlen(campos) || v >= strlen(valores))
 		{
 			flagParenteses = 1;
 		}
@@ -314,7 +316,7 @@ void CortarSQLInsert(bd **bancoDeDados, char comando[])
 	strncpy(valores, inicio_valores, tamanho_valores);
 	valores[tamanho_valores] = '\0';
 
-	printf("Campos %s)\nValores %s)\n", campos, valores);
+	printf("Campos %s \nValores %s \n", campos, valores);
 	CortarSQLAtributos(&(*bancoDeDados), nomeTabela, campos, valores);
 }
 
@@ -330,7 +332,6 @@ char LeComando(bd **bancoDeDados, char comando[])
 		char *ponteiroInsert = strstr(comando, "INSERT INTO");
 		if (ponteiroInsert != NULL)
 		{
-			printf("\nEntrou no if do insert\n");
 			CortarSQLInsert(&(*bancoDeDados), comando);
 		}
 		char *ponteiroUpdate = strstr(comando, "UPDATE");
