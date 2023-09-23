@@ -14,8 +14,38 @@ char buscarTabela(bd **bancoDeDados, char nomeTabela[])
 	return 1;
 }
 
-void InsereValorNoAtributo(char nomeAtributo[], char valorAtributo[])
-{
+
+void exibirTabela(tabela *tabela){
+	printf("\n\n\n");
+	atributo *aux;
+	aux = tabela -> listaAtributos;
+	while(aux != NULL){
+		printf("Atributo %s na tabela %s\n", aux -> campo, tabela -> nometabela);
+		aux = aux -> prox;
+	}
+}
+
+void exibirBanco(bd * bancoDeDados){
+	tabela *auxTabela;
+	ldados *auxDados;
+	atributo *auxAtributos;
+	auxTabela = bancoDeDados -> listaTabela;
+	while(auxTabela != NULL){
+		printf("\n\nTabela: %s", auxTabela -> nometabela);
+		auxAtributos = auxTabela -> listaAtributos;
+		while(auxAtributos != NULL){
+			printf("\n\nAtributo: %s",  auxAtributos -> campo);
+			auxDados = auxAtributos -> listaDados;
+			while(auxDados != NULL){
+				printf("\n-----------------------------------------------------");
+				//AQUI TERA QUE EXIBIR OS OUTROS TIPOS DE DADOS ALEM DE STRING ******************************************************************
+				printf("\nValor: %s", auxDados -> d.valorT);
+				auxDados = auxDados -> prox;
+			}
+			auxAtributos = auxAtributos -> prox;
+		}
+		auxTabela = auxTabela -> prox;
+	}
 }
 
 // Iniciando a criacao das estruturas
@@ -36,7 +66,7 @@ void InsereAtributoNaTabela(tabela **tabela, atributo **novoAtributo)
 		{
 			aux = aux->prox;
 		}
-		aux->prox = novoAtributo;
+		aux->prox = *novoAtributo;
 	}
 	printf("Atributo %s inserido na tabela %s\n", (*novoAtributo)->campo, (*tabela)->nometabela);
 }
@@ -151,6 +181,7 @@ void CriarTabela(bd **bancoDeDados, char nomeTabela[50], FILE **arquivo)
 	novaTabela->listaAtributos = NULL;
 	InsereTabelaNoBancoDeDados(bancoDeDados, &novaTabela);
 	LerAtributosDoArquivo(&(*arquivo), &novaTabela);
+	//exibirTabela((*bancoDeDados) -> listaTabela);
 }
 
 void GetName(char *ponteiro, char *nome, const char *comando)
@@ -217,42 +248,51 @@ void LeArquivo(bd **b_dados)
 
 void Insert(bd **bancoDeDados, char nomeTabela[], char campo[], char valor[])
 {
-	tabela *aux;
-	int x = 0, y = 0;
-	aux = (*bancoDeDados)->listaTabela;
-	while (aux->nometabela != NULL && stricmp(aux->nometabela, nomeTabela) != 0)
-	{
-		aux = aux->prox;
-	}
-	atributo *auxAtr;
-	auxAtr = aux->listaAtributos;
-	while (auxAtr != NULL && stricmp(auxAtr->campo, campo) != 0)
-		auxAtr = auxAtr->prox;
-		
-	ldados *auxDados;
-	auxDados = auxAtr->listaDados;
-	if (auxDados == NULL)
-	{
-		auxDados = (ldados *)malloc(sizeof(ldados));
-		auxDados->prox = NULL;
-		auxDados->terminal = 1;
-		strcpy(auxDados->d.valorT, valor);
-	}
-	else
-	{
-		while (auxDados -> prox != NULL)
-		{
-			auxDados = auxDados->prox;
-		}
-		auxDados->prox = (ldados *)malloc(sizeof(ldados));
-		auxDados = auxDados->prox;
-		auxDados->prox = NULL;
-		auxDados->terminal = 1;
-		strcpy(auxDados->d.valorT, valor);
-	}
-	y++;
-	printf("\nInseriu\n");
+    tabela *aux;
+    int x = 0, y = 0;
+    aux = (*bancoDeDados)->listaTabela;
+    
+    while (aux != NULL && stricmp(aux->nometabela, nomeTabela) != 0)
+    {
+        aux = aux->prox;
+    }
+
+    atributo *auxAtr;
+    auxAtr = aux->listaAtributos;
+    
+    while (auxAtr != NULL && stricmp(auxAtr->campo, campo) != 0)
+    {
+        auxAtr = auxAtr->prox;
+    }
+    
+    ldados *auxDados;
+    auxDados = auxAtr->listaDados;
+    
+    if (auxDados == NULL)
+    {
+        auxAtr->listaDados = (ldados *)malloc(sizeof(ldados));
+        auxDados = auxAtr->listaDados;
+        auxDados->prox = NULL;
+        auxDados->terminal = 1;
+        strcpy(auxDados->d.valorT, valor);
+    }
+    else
+    {
+        while (auxDados->prox != NULL)
+        {
+            auxDados = auxDados->prox;
+        }
+        auxDados->prox = (ldados *)malloc(sizeof(ldados));
+        auxDados = auxDados->prox;
+        auxDados->prox = NULL;
+        auxDados->terminal = 1;
+        strcpy(auxDados->d.valorT, valor);
+    }
+    
+    y++;
+    printf("\nInseriu\n");
 }
+
 
 void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], char valores[])
 {
@@ -261,7 +301,9 @@ void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], cha
 
 	while (!flagParenteses)
 	{
-
+		if(campos[c] == ' '){
+			c++;
+		}
 		for (i = 0; campos[c] != ',' && campos[c] != ')' && c < strlen(campos); i++, c++)
 		{
 			campo[i] = campos[c];
@@ -269,6 +311,9 @@ void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], cha
 		c++;
 		campo[i] = '\0';
 		
+		if(valores[v] == ' '){
+			v++;
+		}
 		for (l = 0; valores[v] != ',' && valores[v] != ')' && v < strlen(valores); v++, l++)
 		{
 			valor[l] = valores[v];
@@ -329,6 +374,11 @@ char LeComando(bd **bancoDeDados, char comando[])
 	}
 	else
 	{
+		char *ponteiroExibir = strstr(comando, "exibir");
+		if(ponteiroExibir != NULL){
+			exibirBanco((*bancoDeDados));
+		}
+		
 		char *ponteiroInsert = strstr(comando, "INSERT INTO");
 		if (ponteiroInsert != NULL)
 		{
