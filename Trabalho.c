@@ -365,6 +365,38 @@ void CortarSQLInsert(bd **bancoDeDados, char comando[])
 	CortarSQLAtributos(&(*bancoDeDados), nomeTabela, campos, valores);
 }
 
+void Delete(bd ** bancoDeDados, char nomeTabela[], char atributo[], char valor[]){
+	
+}
+
+void CortarSQLDelete(bd ** bancoDeDados, char comando[]){
+	char nomeTabela[50], atributo[50], operador, valor[10];
+	int i, a;
+	for (i = strlen("DELETE FROM "), a = 0; i < strlen(comando) && comando[i] != ' '; i++, a++)
+	{
+		nomeTabela[a] = comando[i];
+	}
+	nomeTabela[a] = '\0';
+	
+	i = i+strlen(" WHERE ");
+	
+	for(a=0; comando[i] != ' '; i++, a++){
+		atributo[a] = comando[i];
+	}
+	atributo[a] = '\0';
+	i++;
+	
+	operador = comando[i];
+	i++;
+	
+	for(a=0; comando[i] != ';'; i++, a++){
+		valor[a] = comando[i];
+	}
+	valor[a] = '\0';
+	
+	Delete(&(*bancoDeDados), nomeTabela, atributo, valor);
+}
+
 char LeComando(bd **bancoDeDados, char comando[])
 {
 	if (!strcmp(comando, "sair"))
@@ -397,7 +429,7 @@ char LeComando(bd **bancoDeDados, char comando[])
 		char *ponteiroDelete = strstr(comando, "DELETE");
 		if (ponteiroDelete != NULL)
 		{
-			// Deletar(comando);
+			CortarSQLDelete(&(*bancoDeDados), comando);
 		}
 		return '1';
 	}
