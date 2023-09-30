@@ -1,3 +1,4 @@
 INSERT INTO ALUGUEL (id_aluguel, id_cliente, id_veiculo, dt_saida, dt_retorno, valor_pago) VALUES (1,2,3,4,5,6);
 
+INSERT INTO ALUGUEL (id_aluguel, id_cliente, id_veiculo, dt_saida, dt_retorno, valor_pago) VALUES (8,9,10,11,12,13);
 DELETE FROM ALUGUEL WHERE id_aluguel = 	1;

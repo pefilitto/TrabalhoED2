@@ -14,6 +14,48 @@ char buscarTabela(bd **bancoDeDados, char nomeTabela[])
 	return 1;
 }
 
+int BuscaTipoDado(bd * * bancoDeDados, char nomeTabela[], char atributo1[], int i){
+	tabela *auxTabela;
+	atributo *auxAtributo;
+	int cont=1;
+	
+	auxTabela = (*bancoDeDados) -> listaTabela;
+	while(auxTabela != NULL && stricmp(auxTabela -> nometabela, nomeTabela) != 0){
+		auxTabela = auxTabela -> prox;
+	}
+	
+	if(auxTabela != NULL){
+		auxAtributo = auxTabela -> listaAtributos;
+		while(auxAtributo != NULL && strcmp(auxAtributo -> campo, atributo1) != 0){
+			auxAtributo = auxAtributo -> prox;
+		}
+		
+		if(auxAtributo != NULL){
+			if(auxAtributo -> tipo == 'I'){
+				ldados *dados; 
+				dados = auxAtributo -> listaDados;
+				int novoAtributo = atributo1[i] - '0';
+				while(dados != NULL && dados->d.valorI != novoAtributo){
+					dados = dados -> prox;
+					cont++;
+				}
+				
+				if(dados == NULL)
+					cont = -1;
+				return cont;
+			}
+			else if(auxAtributo -> tipo == 'N')
+				return cont;
+			else if(auxAtributo -> tipo == 'D')
+				return cont;
+			else if(auxAtributo -> tipo == 'C')
+				return cont;
+			else return cont;
+		}
+	}
+	else return -1;
+}
+
 
 void exibirTabela(tabela *tabela){
 	printf("\n\n\n");
@@ -38,8 +80,13 @@ void exibirBanco(bd * bancoDeDados){
 			auxDados = auxAtributos -> listaDados;
 			while(auxDados != NULL){
 				printf("\n-----------------------------------------------------");
-				//AQUI TERA QUE EXIBIR OS OUTROS TIPOS DE DADOS ALEM DE STRING ******************************************************************
-				printf("\nValor: %s", auxDados -> d.valorT);
+				if(auxAtributos -> tipo == 'I'){
+					printf("\nValor: %d", auxDados -> d.valorI);
+				}
+				else if(auxAtributos -> tipo == 'C'){
+					printf("\nValor: %c", auxDados -> d.valorC);
+				}
+				else printf("\nValor: %s", auxDados -> d.valorT);
 				auxDados = auxDados -> prox;
 			}
 			auxAtributos = auxAtributos -> prox;
@@ -246,6 +293,24 @@ void LeArquivo(bd **b_dados)
 
 // Iniciando os comandos INSERT, DELETE, SELECT e UPDATE
 
+void AtribuiTipoDeDadoAoAtributo(ldados * * dados, char valor[], char tipo){
+	if(tipo == 'I'){
+		(*dados) -> d.valorI = valor[0] - '0';
+	}
+	else if(tipo == 'N'){
+		
+	}
+	else if(tipo == 'D'){
+		
+	}
+	else if(tipo == 'C'){
+		(*dados) -> d.valorC = valor[0];
+	}
+	else{
+		strcpy((*dados)->d.valorT, valor);
+	}
+}
+
 void Insert(bd **bancoDeDados, char nomeTabela[], char campo[], char valor[])
 {
     tabela *aux;
@@ -274,7 +339,7 @@ void Insert(bd **bancoDeDados, char nomeTabela[], char campo[], char valor[])
         auxDados = auxAtr->listaDados;
         auxDados->prox = NULL;
         auxDados->terminal = 1;
-        strcpy(auxDados->d.valorT, valor);
+        AtribuiTipoDeDadoAoAtributo(&auxDados, valor, auxAtr -> tipo);
     }
     else
     {
@@ -365,13 +430,14 @@ void CortarSQLInsert(bd **bancoDeDados, char comando[])
 	CortarSQLAtributos(&(*bancoDeDados), nomeTabela, campos, valores);
 }
 
-void Delete(bd ** bancoDeDados, char nomeTabela[], char atributo[], char valor[]){
+void Delete(bd ** bancoDeDados, char nomeTabela[], char atributo[], ldados valor){
 	
 }
 
 void CortarSQLDelete(bd ** bancoDeDados, char comando[]){
-	char nomeTabela[50], atributo[50], operador, valor[10];
-	int i, a;
+	char nomeTabela[50], atributo[50], operador;
+	ldados valor;
+	int i, a, n, nivel=0;
 	for (i = strlen("DELETE FROM "), a = 0; i < strlen(comando) && comando[i] != ' '; i++, a++)
 	{
 		nomeTabela[a] = comando[i];
@@ -386,15 +452,15 @@ void CortarSQLDelete(bd ** bancoDeDados, char comando[]){
 	atributo[a] = '\0';
 	i++;
 	
-	operador = comando[i];
-	i++;
+	nivel = BuscaTipoDado(&(*bancoDeDados), nomeTabela, atributo, i+2);
+	printf("%d\n", nivel);
 	
+	/*operador = comando[i];
+	i++;
 	for(a=0; comando[i] != ';'; i++, a++){
 		valor[a] = comando[i];
 	}
-	valor[a] = '\0';
-	
-	Delete(&(*bancoDeDados), nomeTabela, atributo, valor);
+	valor[a] = '\0';*/
 }
 
 char LeComando(bd **bancoDeDados, char comando[])
