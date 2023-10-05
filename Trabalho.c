@@ -57,7 +57,7 @@ int BuscaTipoDado(bd * * bancoDeDados, char nomeTabela[], char atributo1[], int 
 }
 
 
-void exibirTabela(tabela *tabela){
+/*void exibirTabela(tabela *tabela){
 	printf("\n\n\n");
 	atributo *aux;
 	aux = tabela -> listaAtributos;
@@ -65,36 +65,61 @@ void exibirTabela(tabela *tabela){
 		printf("Atributo %s na tabela %s\n", aux -> campo, tabela -> nometabela);
 		aux = aux -> prox;
 	}
+}*/
+
+void gotoxy(int x, int y) {
+    printf("\033[%d;%dH", y, x);
 }
 
-void exibirBanco(bd * bancoDeDados){
-	tabela *auxTabela;
-	ldados *auxDados;
-	atributo *auxAtributos;
-	auxTabela = bancoDeDados -> listaTabela;
-	while(auxTabela != NULL){
-		printf("\n\nTabela: %s", auxTabela -> nometabela);
-		auxAtributos = auxTabela -> listaAtributos;
-		while(auxAtributos != NULL){
-			printf("\n\nAtributo: %s",  auxAtributos -> campo);
-			auxDados = auxAtributos -> listaDados;
-			while(auxDados != NULL){
-				printf("\n-----------------------------------------------------");
-				if(auxAtributos -> tipo == 'I'){
-					printf("\nValor: %d", auxDados -> d.valorI);
-				}
-				else if(auxAtributos -> tipo == 'C'){
-					printf("\nValor: %c", auxDados -> d.valorC);
-				}
-				else printf("\nValor: %s", auxDados -> d.valorT);
-				auxDados = auxDados -> prox;
-			}
-			auxAtributos = auxAtributos -> prox;
-		}
-		auxTabela = auxTabela -> prox;
-	}
-}
+void exibirBanco(bd *bancoDeDados) {
+    int totalLinhas = 25;
+    int linhaInicial = (totalLinhas - 10) / 2;
 
+    tabela *auxTabela = bancoDeDados->listaTabela;
+    int linha = linhaInicial;
+
+    while (auxTabela != NULL) {
+        printf("\n=====================================");
+        printf("\nTabela: %s", auxTabela->nometabela);
+        printf("\n=====================================\n");
+
+        atributo *auxAtributos = auxTabela->listaAtributos;
+
+        while (auxAtributos != NULL) {
+            printf("\nAtributo: %s\n", auxAtributos->campo);
+
+            ldados *auxDados = auxAtributos->listaDados;
+            int i = 1;
+
+            while (auxDados != NULL) {
+                printf("%d - ", i++);
+
+                switch (auxAtributos->tipo) {
+                    case 'I':
+                        printf("%d\n", auxDados->d.valorI);
+                        break;
+                    case 'C':
+                        printf("%s\n", auxDados->d.valorT);
+                        break;
+                    case 'N':
+                        printf("%.1f\n", auxDados->d.valorN);
+                        break;
+                    default:
+                        printf("%s\n", auxDados->d.valorT);
+                }
+
+                auxDados = auxDados->prox;
+            }
+
+            auxAtributos = auxAtributos->prox;
+        }
+
+        // Adicione espaço entre tabelas
+        linha += 3;
+
+        auxTabela = auxTabela->prox;
+    }
+}
 // Iniciando a criacao das estruturas
 
 void InsereAtributoNaTabela(tabela **tabela, atributo **novoAtributo)
@@ -115,7 +140,7 @@ void InsereAtributoNaTabela(tabela **tabela, atributo **novoAtributo)
 		}
 		aux->prox = *novoAtributo;
 	}
-	printf("Atributo %s inserido na tabela %s\n", (*novoAtributo)->campo, (*tabela)->nometabela);
+	//printf("Atributo %s inserido na tabela %s\n", (*novoAtributo)->campo, (*tabela)->nometabela);
 }
 
 void CriarAtributo(tabela **tabela, char nomeAtributo[50], char tipo)
@@ -151,7 +176,7 @@ void InsereTabelaNoBancoDeDados(bd **bancoDeDados, tabela **novaTabela)
 		(*novaTabela)->ant = aux;
 	}
 
-	printf("\nTabela %s foi criada dentro do banco %s\n", (*novaTabela)->nometabela, (*bancoDeDados)->nome_banco);
+	//printf("\nTabela %s foi criada dentro do banco %s\n", (*novaTabela)->nometabela, (*bancoDeDados)->nome_banco);
 }
 
 void AtribuiPKaoAtributo(tabela **t, char nome[])
@@ -163,27 +188,28 @@ void AtribuiPKaoAtributo(tabela **t, char nome[])
 	if (aux != NULL)
 	{
 		aux->PK = 'S';
-		printf("Atributo %s recebeu PK\n", aux->campo);
+		//printf("Atributo %s recebeu PK\n", aux->campo);
 	}
 }
 
 void LerAtributosDoArquivo(FILE **arquivo, tabela **tabelaCriada)
 {
 	char nome[50], tipo[20], linha[1000], linha2[1000];
-	int flag = 0, i, j, z = 0;
+	int flag = 0, i=0, j, z = 0, m;
 	if (*arquivo == NULL)
 		printf("Ponteiro invalido na funcao leratributos\n");
 	else
 	{
 		while (flag == 0)
 		{
+			i=0;
 			fscanf(*arquivo, "%[^\n]", &linha);
 			fgetc(*arquivo);
 			if (strstr(linha, "CONSTRAINT") != NULL)
 			{
 				if (strstr(linha, "PRIMARY KEY") != NULL)
 				{
-					printf("Achou o primary key\n");
+					//printf("Achou o primary key\n");
 					for (i = 0; i < strlen(linha); i++)
 					{
 						if (linha[i] == '(')
@@ -210,9 +236,11 @@ void LerAtributosDoArquivo(FILE **arquivo, tabela **tabelaCriada)
 				}
 				else
 				{
-					for (i = 0; i < strlen(linha) && linha[i] != ' '; i++)
-						nome[i] = linha[i];
-					nome[i] = '\0';
+					while(linha[i] == ' ')
+						i++;
+					for (m=0 ; linha[i] != ' '; i++, m++)
+						nome[m] = linha[i];
+					nome[m] = '\0';
 					tipo[0] = linha[i + 1];
 					CriarAtributo(&(*tabelaCriada), nome, tipo[0]);
 				}
@@ -254,6 +282,7 @@ void GetName(char *ponteiro, char *nome, const char *comando)
 	strcpy(nome, auxNome);
 }
 
+
 void LeArquivo(bd **b_dados)
 {
 	FILE *ptr = fopen("ComandoSQL.txt", "r+");
@@ -278,7 +307,7 @@ void LeArquivo(bd **b_dados)
 		char *ponteiroAlterTable = strstr(linha, "ALTER TABLE");
 		if (ponteiroAlterTable != NULL)
 		{
-			printf("\nAchou o alter table\n");
+			//printf("\nAchou o alter table\n");
 			GetName(ponteiroAlterTable, auxNome, "ALTER TABLE");
 			if (buscarTabela(b_dados, auxNome))
 			{
@@ -295,16 +324,16 @@ void LeArquivo(bd **b_dados)
 
 void AtribuiTipoDeDadoAoAtributo(ldados * * dados, char valor[], char tipo){
 	if(tipo == 'I'){
-		(*dados) -> d.valorI = valor[0] - '0';
+		(*dados) -> d.valorI = atoi(valor);
 	}
 	else if(tipo == 'N'){
-		
+		(*dados) -> d.valorN = atoi(valor);
 	}
 	else if(tipo == 'D'){
 		
 	}
 	else if(tipo == 'C'){
-		(*dados) -> d.valorC = valor[0];
+		strcpy((*dados)->d.valorT, valor);
 	}
 	else{
 		strcpy((*dados)->d.valorT, valor);
@@ -355,14 +384,14 @@ void Insert(bd **bancoDeDados, char nomeTabela[], char campo[], char valor[])
     }
     
     y++;
-    printf("\nInseriu\n");
+    //printf("\nInseriu\n");
 }
 
 
 void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], char valores[])
 {
 	int i, c = 0, v = 0, k, flagParenteses = 0, l;
-	char campo[15], valor[15];
+	char campo[50], valor[50];
 
 	while (!flagParenteses)
 	{
@@ -385,7 +414,7 @@ void CortarSQLAtributos(bd **bancoDeDados, char nomeTabela[], char campos[], cha
 		}
 		valor[l] = '\0';
 		v++;
-		printf("Inserindo campo %s, valor %s\n", campo, valor);
+		//printf("Inserindo campo %s, valor %s\n", campo, valor);
 		Insert(&(*bancoDeDados), nomeTabela, campo, valor);
 
 		if (c >= strlen(campos) || v >= strlen(valores))
@@ -415,7 +444,7 @@ void CortarSQLInsert(bd **bancoDeDados, char comando[])
 	strncpy(campos, inicio_campos, tamanho_campos);
 	campos[tamanho_campos] = '\0';
 
-	char *inicio_valores = strstr(comando, "VALUES");
+	char *inicio_valores = strstr(comando, "values") ? strstr(comando, "values") : strstr(comando, "VALUES");
 	inicio_valores = strchr(inicio_valores, '(');
 	inicio_valores++; // Avanï¿½ar para o primeiro caractere apï¿½s o parï¿½ntese
 
@@ -503,15 +532,17 @@ char LeComando(bd **bancoDeDados, char comando[])
 
 int main()
 {
-	char comando[2000];
+	char comando[4000];
 	bd *bancoDeDados;
 	LeArquivo(&bancoDeDados);
 	printf("Digite o comando: ");
 	fflush(stdin);
-	while (LeComando(&bancoDeDados, gets(comando)) != '0')
+	gets(comando);
+	while (LeComando(&bancoDeDados, comando) != '0')
 	{
 		printf("Digite o comando: ");
 		fflush(stdin);
+		gets(comando);
 	}
 	exibir(bancoDeDados);
 }
