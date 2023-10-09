@@ -14,10 +14,12 @@ char buscarTabela(bd **bancoDeDados, char nomeTabela[])
 	return 1;
 }
 
-int BuscaTipoDado(bd * * bancoDeDados, char nomeTabela[], char atributo1[], int i){
+int BuscaNivelDado(bd * * bancoDeDados, char nomeTabela[], char atributo1[], char valor[]){
 	tabela *auxTabela;
 	atributo *auxAtributo;
-	int cont=1;
+	ldados *dados; 
+	int cont=1, valorAtributoInt;
+	float valorAtributoFloat;
 	
 	auxTabela = (*bancoDeDados) -> listaTabela;
 	while(auxTabela != NULL && stricmp(auxTabela -> nometabela, nomeTabela) != 0){
@@ -32,10 +34,22 @@ int BuscaTipoDado(bd * * bancoDeDados, char nomeTabela[], char atributo1[], int 
 		
 		if(auxAtributo != NULL){
 			if(auxAtributo -> tipo == 'I'){
+				dados = auxAtributo -> listaDados;
+				valorAtributoInt = atoi(valor);
+				while(dados != NULL && dados->d.valorI != valorAtributoInt){
+					dados = dados -> prox;
+					cont++;
+				}
+				
+				if(dados == NULL)
+					 return -1;
+				return cont;
+			}
+			else if(auxAtributo -> tipo == 'N'){
 				ldados *dados; 
 				dados = auxAtributo -> listaDados;
-				int novoAtributo = atributo1[i] - '0';
-				while(dados != NULL && dados->d.valorI != novoAtributo){
+				valorAtributoFloat = atof(atributo1);
+				while(dados != NULL && dados->d.valorN != valorAtributoFloat){
 					dados = dados -> prox;
 					cont++;
 				}
@@ -44,16 +58,34 @@ int BuscaTipoDado(bd * * bancoDeDados, char nomeTabela[], char atributo1[], int 
 					cont = -1;
 				return cont;
 			}
-			else if(auxAtributo -> tipo == 'N')
-				return cont;
 			else if(auxAtributo -> tipo == 'D')
 				return cont;
-			else if(auxAtributo -> tipo == 'C')
+			else if(auxAtributo -> tipo == 'C'){
+				ldados *dados; 
+				dados = auxAtributo -> listaDados;
+				while(dados != NULL && strcmp(dados->d.valorC, atributo1) != 0){
+					dados = dados -> prox;
+					cont++;
+				}
+				
+				if(dados == NULL)
+					cont = -1;
 				return cont;
-			else return cont;
+			}
+			else{
+				ldados *dados; 
+				dados = auxAtributo -> listaDados;
+				while(dados != NULL && strcmp(dados->d.valorT, atributo1) != 0){
+					dados = dados -> prox;
+					cont++;
+				}
+				
+				if(dados == NULL)
+					cont = -1;
+				return cont;
+			}
 		}
 	}
-	else return -1;
 }
 
 
@@ -327,7 +359,7 @@ void AtribuiTipoDeDadoAoAtributo(ldados * * dados, char valor[], char tipo){
 		(*dados) -> d.valorI = atoi(valor);
 	}
 	else if(tipo == 'N'){
-		(*dados) -> d.valorN = atoi(valor);
+		(*dados) -> d.valorN = atof(valor);
 	}
 	else if(tipo == 'D'){
 		
@@ -380,7 +412,7 @@ void Insert(bd **bancoDeDados, char nomeTabela[], char campo[], char valor[])
         auxDados = auxDados->prox;
         auxDados->prox = NULL;
         auxDados->terminal = 1;
-        strcpy(auxDados->d.valorT, valor);
+        AtribuiTipoDeDadoAoAtributo(&auxDados, valor, auxAtr -> tipo);
     }
     
     y++;
@@ -459,12 +491,50 @@ void CortarSQLInsert(bd **bancoDeDados, char comando[])
 	CortarSQLAtributos(&(*bancoDeDados), nomeTabela, campos, valores);
 }
 
-void Delete(bd ** bancoDeDados, char nomeTabela[], char atributo[], ldados valor){
+void Delete(bd ** bancoDeDados, char nomeTabela[], int nivel){
+	tabela *auxTabela;
+	atributo *auxAtributo;
+	ldados *dados, *anterior, *elementoLiberar; 
+	int nivelAtual;
+	auxTabela = (*bancoDeDados) -> listaTabela;
+	while(auxTabela != NULL && stricmp(auxTabela -> nometabela, nomeTabela) != 0){
+		auxTabela = auxTabela -> prox;
+	}
 	
+	if(auxTabela != NULL){
+		auxAtributo = auxTabela -> listaAtributos;
+		while(auxAtributo != NULL){
+			nivelAtual=1;
+			dados = auxAtributo -> listaDados;
+			while(dados != NULL && nivelAtual != nivel){
+				dados = dados -> prox;
+				nivelAtual++;
+			}
+			
+			if(nivelAtual == nivel){
+			    elementoLiberar = dados;
+			    
+			    if (dados == auxAtributo->listaDados) {
+			        auxAtributo->listaDados = dados->prox;
+			    } 
+				else {
+			        anterior = auxAtributo->listaDados;
+			        while (anterior->prox != dados) {
+			            anterior = anterior->prox;
+			        }
+			        
+			        anterior->prox = dados->prox;
+    			}
+    			
+    			free(elementoLiberar);
+			}
+			auxAtributo = auxAtributo -> prox;
+		}
+	}
 }
 
 void CortarSQLDelete(bd ** bancoDeDados, char comando[]){
-	char nomeTabela[50], atributo[50], operador;
+	char nomeTabela[50], atributo[50], operador, valorAtributoStr[50];
 	ldados valor;
 	int i, a, n, nivel=0;
 	for (i = strlen("DELETE FROM "), a = 0; i < strlen(comando) && comando[i] != ' '; i++, a++)
@@ -479,17 +549,96 @@ void CortarSQLDelete(bd ** bancoDeDados, char comando[]){
 		atributo[a] = comando[i];
 	}
 	atributo[a] = '\0';
-	i++;
+	i+=3;
 	
-	nivel = BuscaTipoDado(&(*bancoDeDados), nomeTabela, atributo, i+2);
-	printf("%d\n", nivel);
-	
-	/*operador = comando[i];
-	i++;
 	for(a=0; comando[i] != ';'; i++, a++){
-		valor[a] = comando[i];
+		valorAtributoStr[a] = comando[i];
 	}
-	valor[a] = '\0';*/
+	valorAtributoStr[a] = '\0';
+	
+	nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, atributo, valorAtributoStr);
+	Delete(&(*bancoDeDados), nomeTabela, nivel);
+}
+
+void Update(bd * * bancoDeDados, char nomeTabela[], char nomeAtributoParaAtualizar[], int valorAtributoNovo, char pkDoAtributoParaAtualizar[], char valorDaPk[]){
+	tabela *auxTabela;
+	atributo *auxAtributo;
+	ldados *dados;
+	int nivel, valor, nivelAtual=1;
+	auxTabela = (*bancoDeDados) -> listaTabela;
+	while(auxTabela != NULL && stricmp(auxTabela -> nometabela, nomeTabela) != 0){
+		auxTabela = auxTabela -> prox;
+	}
+	
+	if(auxTabela != NULL){
+		auxAtributo = auxTabela -> listaAtributos;
+		while(auxAtributo != NULL && strcmp(pkDoAtributoParaAtualizar, auxAtributo -> campo) != 0)
+			auxAtributo = auxAtributo -> prox;
+		
+		if(auxAtributo != NULL){
+			dados = auxAtributo -> listaDados;
+			valor = atoi(valorDaPk);
+			while(dados != NULL && valor != dados->d.valorI)
+				dados = dados -> prox;
+			
+			if(dados != NULL){
+				nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, pkDoAtributoParaAtualizar, valorDaPk);
+				auxAtributo = auxTabela -> listaAtributos;
+				while(auxAtributo != NULL && strcmp(nomeAtributoParaAtualizar, auxAtributo -> campo) != 0)
+					auxAtributo = auxAtributo -> prox;
+				
+				if(auxAtributo != NULL){
+					dados = auxAtributo -> listaDados;
+					while(dados != NULL && nivel != nivelAtual){
+						dados = dados -> prox;
+						nivelAtual++;
+					}
+					
+					if(nivel == nivelAtual)
+						dados -> d.valorI = valorAtributoNovo;
+				}
+			}
+				
+		}
+	}
+}
+
+void CortarSQLUpdate(bd * * bancoDeDados, char comando[]){
+	char nomeTabela[50], nomeAtributoParaAtualizar[50], valorAtributoParaAtualizar[10], pkDoAtributoParaAtualizar[50], valorDaPkParaAtualizar[10];
+	int i, a, valorAtributoNovo, valorDaPk;
+	for(i = strlen("UPDATE "), a=0; i < strlen(comando) && comando[i] != ' '; i++, a++){
+		nomeTabela[a] = comando[i];
+	}
+	nomeTabela[a] = '\0';
+	
+	i = i+strlen(" SET ");
+	for(a=0; comando[i] != ' '; a++, i++){
+		nomeAtributoParaAtualizar[a] = comando[i];
+	}
+	nomeAtributoParaAtualizar[a] = '\0';
+	
+	i+=3;
+	for(a=0; comando[i] != ' '; i++, a++){
+		valorAtributoParaAtualizar[a] = comando[i];
+	}
+	valorAtributoParaAtualizar[a] = '\0';
+	
+	i=i+strlen(" WHERE ");
+	
+	for(a=0; comando[i] != ' '; a++, i++){
+		pkDoAtributoParaAtualizar[a] = comando[i];
+	}
+	pkDoAtributoParaAtualizar[a] = '\0';
+	
+	i+=3;
+	for(a=0; comando[i] != ';'; a++, i++){
+		valorDaPkParaAtualizar[a] = comando[i];
+	}
+	valorDaPkParaAtualizar[a] = '\0';
+	
+	valorAtributoNovo = atoi(valorAtributoParaAtualizar);
+	
+	Update(&(*bancoDeDados), nomeTabela, nomeAtributoParaAtualizar, valorAtributoNovo, pkDoAtributoParaAtualizar, valorDaPkParaAtualizar);
 }
 
 char LeComando(bd **bancoDeDados, char comando[])
@@ -514,7 +663,7 @@ char LeComando(bd **bancoDeDados, char comando[])
 		char *ponteiroUpdate = strstr(comando, "UPDATE");
 		if (ponteiroUpdate != NULL)
 		{
-			// Atualizar(comando);
+			CortarSQLUpdate(&(*bancoDeDados), comando);
 		}
 		char *ponteiroSelect = strstr(comando, "SELECT");
 		if (ponteiroSelect != NULL)
