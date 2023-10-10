@@ -783,17 +783,17 @@ void Select(bd **bancoDeDados, char nomeTabela[], char nomeAtributo[])
 
 				switch (auxAtributo->tipo)
 				{
-				case 'I':
-					printf("%d\n", auxDados->d.valorI);
-					break;
-				case 'C':
-					printf("%s\n", auxDados->d.valorT);
-					break;
-				case 'N':
-					printf("%.1f\n", auxDados->d.valorN);
-					break;
-				default:
-					printf("%s\n", auxDados->d.valorT);
+					case 'I':
+						printf("%d\n", auxDados->d.valorI);
+						break;
+					case 'C':
+						printf("%s\n", auxDados->d.valorT);
+						break;
+					case 'N':
+						printf("%.1f\n", auxDados->d.valorN);
+						break;
+					default:
+						printf("%s\n", auxDados->d.valorT);
 				}
 				auxDados = auxDados->prox;
 			}
@@ -840,7 +840,7 @@ void CortarSQLSelect(bd **bancoDeDados, char comando[])
 	}
 }
 
-void ExibirAtributoNoNivel(tabela **auxTabela, int nivel, char nomeAtributo[])
+void ExibirAtributoNoNivel(tabela **auxTabela, int nivel, char nomeAtributo[], int i)
 {
 	atributo *auxAtributo;
 	ldados *auxDados;
@@ -848,37 +848,11 @@ void ExibirAtributoNoNivel(tabela **auxTabela, int nivel, char nomeAtributo[])
 	int nivelAtual = 1;
 	while (auxAtributo != NULL && strcmp(auxAtributo->campo, nomeAtributo) != 0)
 	{
-		if(strcmp(nomeAtributo, "ALL") == 0){
-			auxDados = auxAtributo->listaDados;
-			while (nivelAtual != nivel)
-			{
-				auxDados = auxDados->prox;
-				nivelAtual++;
-			}
-		
-			if (nivel == nivelAtual)
-			{
-				switch (auxAtributo->tipo)
-				{
-				case 'I':
-					printf("%d\n", auxDados->d.valorI);
-					break;
-				case 'C':
-					printf("%s\n", auxDados->d.valorT);
-					break;
-				case 'N':
-					printf("%.1f\n", auxDados->d.valorN);
-					break;
-				default:
-					printf("%s\n", auxDados->d.valorT);
-				}
-			}
-		}
-		nivelAtual=1;
 		auxAtributo = auxAtributo->prox;
 	}
 	
 	if(auxAtributo != NULL){
+		
 		auxDados = auxAtributo->listaDados;
 		while (nivelAtual != nivel)
 		{
@@ -890,17 +864,17 @@ void ExibirAtributoNoNivel(tabela **auxTabela, int nivel, char nomeAtributo[])
 		{
 			switch (auxAtributo->tipo)
 			{
-			case 'I':
-				printf("%d\n", auxDados->d.valorI);
-				break;
-			case 'C':
-				printf("%s\n", auxDados->d.valorT);
-				break;
-			case 'N':
-				printf("%.1f\n", auxDados->d.valorN);
-				break;
-			default:
-				printf("%s\n", auxDados->d.valorT);
+				case 'I':
+					printf("%d - %d\n", i, auxDados->d.valorI);
+					break;
+				case 'C':
+					printf("%d - %s\n", i, auxDados->d.valorT);
+					break;
+				case 'N':
+					printf("%d - %.1f\n", i, auxDados->d.valorN);
+					break;
+				default:
+					printf("%d - %s\n", i, auxDados->d.valorT);
 			}
 		}	
 	}
@@ -911,7 +885,7 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 	tabela *auxTabela;
 	atributo *auxAtributo, *auxAtributo2;
 	ldados *dados;
-	int nivel;
+	int nivel, i=1;
 	char intToChar[50];
 	auxTabela = (*bancoDeDados)->listaTabela;
 	while (auxTabela != NULL && strcmp(auxTabela->nometabela, nomeTabela) != 0)
@@ -932,6 +906,7 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 			dados = auxAtributo->listaDados;
 			while (dados != NULL)
 			{
+				i=1;
 				if (auxAtributo->tipo == 'I')
 				{
 					if (dados->d.valorI >= atoi(valor1) && dados->d.valorI <= atoi(valor2))
@@ -939,7 +914,7 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 						itoa(dados->d.valorI, intToChar, 10);
 						nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, nomeAtributoChave, intToChar);
 						while(auxAtributo2!=NULL){
-							ExibirAtributoNoNivel(&auxTabela, nivel, auxAtributo2 -> campo);
+							ExibirAtributoNoNivel(&auxTabela, nivel, auxAtributo2 -> campo, i++);
 							auxAtributo2 = auxAtributo2->prox;
 						}
 						auxAtributo2 = auxTabela->listaAtributos;
@@ -952,7 +927,7 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 					{
 						nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, nomeAtributoChave, dados->d.valorT);
 						while(auxAtributo2!=NULL){
-							ExibirAtributoNoNivel(&auxTabela, nivel, auxAtributo2 -> campo);
+							ExibirAtributoNoNivel(&auxTabela, nivel, auxAtributo2 -> campo, i++);
 							auxAtributo2 = auxAtributo2->prox;
 						}
 						auxAtributo2 = auxTabela->listaAtributos;
@@ -973,7 +948,7 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 						{
 							itoa(dados->d.valorI, intToChar, 10);
 							nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, nomeAtributoChave, intToChar);
-							ExibirAtributoNoNivel(&auxTabela, nivel, nomeAtributo);
+							ExibirAtributoNoNivel(&auxTabela, nivel, nomeAtributo, i++);
 						}
 					}
 					else if (auxAtributo->tipo == 'T')
@@ -981,7 +956,7 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 						if (strcmp(dados->d.valorT, valor1) >= 0 && strcmp(dados->d.valorT, valor2) <= 0)
 						{
 							nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, nomeAtributoChave, dados->d.valorT);
-							ExibirAtributoNoNivel(&auxTabela, nivel, nomeAtributo);
+							ExibirAtributoNoNivel(&auxTabela, nivel, nomeAtributo, i++);
 						}
 					}
 					dados = dados->prox;
@@ -995,6 +970,9 @@ void CortarSQLSelectBetween(bd **bancoDeDados, char comando[])
 {
 	int i, a;
 	char nomeTabela[20] = "", nomeAtributo[50], nomeAtributoChave[20], valor1[10], valor2[10];
+	tabela *auxTabela;
+	atributo *auxAtributo;
+	ldados *auxDados;
 	char *ponteiroFrom = NossaStrStr(comando, "FROM");
 	if (ponteiroFrom != NULL)
 	{
@@ -1050,8 +1028,21 @@ void CortarSQLSelectBetween(bd **bancoDeDados, char comando[])
 	}
 
 	i = strlen("SELECT ");
-	if (comando[i] == '*')
-		SelectBetween(&(*bancoDeDados), nomeTabela, nomeAtributoChave, "ALL", valor1, valor2);
+	if (comando[i] == '*'){
+		auxTabela = (*bancoDeDados) -> listaTabela;
+		while(auxTabela != NULL && strcmp(auxTabela -> nometabela, nomeTabela) != 0){
+			auxTabela = auxTabela -> prox;
+		}
+		
+		if(auxTabela != NULL){
+			auxAtributo = auxTabela -> listaAtributos;
+			while(auxAtributo != NULL){
+				printf("\nAtributo: %s\n", auxAtributo -> campo);
+				SelectBetween(&(*bancoDeDados), nomeTabela, nomeAtributoChave, auxAtributo->campo, valor1, valor2);
+				auxAtributo = auxAtributo -> prox;
+			}
+		}
+	}
 	else
 	{
 		while (i < strlen(comando) && comando[i] != 'F')
