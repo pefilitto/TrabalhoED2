@@ -909,7 +909,7 @@ void ExibirAtributoNoNivel(tabela **auxTabela, int nivel, char nomeAtributo[])
 void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[], char nomeAtributo[], char valor1[], char valor2[])
 {
 	tabela *auxTabela;
-	atributo *auxAtributo;
+	atributo *auxAtributo, *auxAtributo2;
 	ldados *dados;
 	int nivel;
 	char intToChar[50];
@@ -922,6 +922,7 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 	if (auxTabela != NULL)
 	{
 		auxAtributo = auxTabela->listaAtributos;
+		auxAtributo2 = auxTabela->listaAtributos;
 		while (auxAtributo != NULL && strcmp(auxAtributo->campo, nomeAtributoChave) != 0)
 		{
 			auxAtributo = auxAtributo->prox;
@@ -937,7 +938,12 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 					{
 						itoa(dados->d.valorI, intToChar, 10);
 						nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, nomeAtributoChave, intToChar);
-						ExibirAtributoNoNivel(&auxTabela, nivel, nomeAtributo);
+						while(auxAtributo2!=NULL){
+							ExibirAtributoNoNivel(&auxTabela, nivel, auxAtributo2 -> campo);
+							auxAtributo2 = auxAtributo2->prox;
+						}
+						auxAtributo2 = auxTabela->listaAtributos;
+						
 					}
 				}
 				else if (auxAtributo->tipo == 'T')
@@ -945,7 +951,11 @@ void SelectBetween(bd **bancoDeDados, char nomeTabela[], char nomeAtributoChave[
 					if (strcmp(dados->d.valorT, valor1) >= 0 && strcmp(dados->d.valorT, valor2) <= 0)
 					{
 						nivel = BuscaNivelDado(&(*bancoDeDados), nomeTabela, nomeAtributoChave, dados->d.valorT);
-						ExibirAtributoNoNivel(&auxTabela, nivel, nomeAtributo);
+						while(auxAtributo2!=NULL){
+							ExibirAtributoNoNivel(&auxTabela, nivel, auxAtributo2 -> campo);
+							auxAtributo2 = auxAtributo2->prox;
+						}
+						auxAtributo2 = auxTabela->listaAtributos;
 					}
 				}
 				dados = dados->prox;
